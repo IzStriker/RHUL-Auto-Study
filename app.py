@@ -61,7 +61,7 @@ def get_room_ids(browser):
     room_list = []
     # Nav to "Book a Study room" page once loaded
     link = WebDriverWait(browser, MAX_WAIT).until(
-        EC.presence_of_element_located((By.ID, "ember1314")))
+        EC.presence_of_element_located((By.CLASS_NAME, "resourcesGrid-item-link")))
     link.click()
 
     token = browser.execute_script(
@@ -103,7 +103,7 @@ def get_availability(data, start, end):
     free_spaces = []
     for room in data["room_list"]:
         res = requests.get(
-            f"https://scientia-eu-v3-2-2-api-d2-02.azurewebsites.net/api/Resources/{room['room_id']}/BookingRequests?StartDate=2022-01-31T00:00:00.000Z&EndDate=2022-02-10T23:59:00.000Z&CheckSplitPermissions=false",
+            f"https://scientia-eu-v3-2-2-api-d2-02.azurewebsites.net/api/Resources/{room['room_id']}/BookingRequests",
             headers=headers,
             params=params)
 
