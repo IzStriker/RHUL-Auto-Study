@@ -72,8 +72,10 @@ def get_room_ids(browser):
         EC.presence_of_element_located((By.CLASS_NAME, "resourcesList-items")))
 
     soup = BeautifulSoup(browser.page_source, "html.parser")
+
     # Get the table
-    room_data = soup.find("ul", {"id": "ember1875"}).find_all("li")
+    room_data = soup.find(
+        "ul", {"class": "ember-view resourcesList-items"}).find_all("li")
 
     for room in room_data:
         name = room.find("span", {"class": "resourcesList-item-name"}).text
