@@ -6,10 +6,10 @@ from free_space import free_space
 from selenium import webdriver
 from bs4 import BeautifulSoup
 from datetime import datetime
+from graph_viz import generate
 import requests
 import argparse
 
-from time import sleep
 
 LOGIN_PAGE = "https://scientia-rb-rhul.azurewebsites.net/app/booking-types"
 AVAILABILITY_URL = "https://scientia-eu-v3-2-2-api-d2-02.azurewebsites.net/api/Resources/{{roomId}}/BookingRequests?StartDate=2022-01-31T00:00:00.000Z&EndDate=2022-02-10T23:59:00.000Z&CheckSplitPermissions=false"
@@ -25,7 +25,10 @@ def main():
     login(browser, args)
     data = get_room_ids(browser)
     browser.close()
-    print(get_availability(data, datetime(2022, 2, 7), datetime(2022, 2, 11)))
+    spaces = get_availability(data, datetime(
+        2022, 2, 7), datetime(2022, 2, 11))
+
+    generate(spaces)
 
 
 def get_login_details():
@@ -64,6 +67,7 @@ def get_room_ids(browser):
         EC.presence_of_element_located((By.CLASS_NAME, "resourcesGrid-item-link")))
     link.click()
 
+    # Get JWT Token
     token = browser.execute_script(
         "return JSON.parse(localStorage.getItem('scientia-session-authorization')).access_token")
 
@@ -109,10 +113,12 @@ def get_availability(data, start, end):
             headers=headers,
             params=params)
 
-        free_spaces.append({
-            "name": room["name"],
-            "spaces": free_space(res.json())
-        })
+        for space in free_space(res.json()):
+            free_spaces.append({
+                "room": room["name"],
+                "start": space["StartDateTime"],
+                "end": space["EndDateTime"]
+            })
     return free_spaces
 
 

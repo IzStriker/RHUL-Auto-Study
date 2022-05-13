@@ -8,7 +8,7 @@ def main():
     data = {}
     with open("sample.json", "r") as file:
         data = json.loads(file.read())
-    free_space(data)
+    print(free_space(data))
 
 
 def free_space(data):
