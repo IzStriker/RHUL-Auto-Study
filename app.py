@@ -5,19 +5,19 @@ import chromedriver_autoinstaller
 from free_space import free_space
 from selenium import webdriver
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timedelta
 from graph_viz import generate
 import requests
 import argparse
 
 
 LOGIN_PAGE = "https://scientia-rb-rhul.azurewebsites.net/app/booking-types"
-AVAILABILITY_URL = "https://scientia-eu-v3-2-2-api-d2-02.azurewebsites.net/api/Resources/{{roomId}}/BookingRequests?StartDate=2022-01-31T00:00:00.000Z&EndDate=2022-02-10T23:59:00.000Z&CheckSplitPermissions=false"
 MAX_WAIT = 15
 
 
 def main():
     args = get_login_details()
+
     chromedriver_autoinstaller.install()
 
     browser = webdriver.Chrome()
@@ -25,19 +25,25 @@ def main():
     login(browser, args)
     data = get_room_ids(browser)
     browser.close()
-    spaces = get_availability(data, datetime(
-        2022, 2, 7), datetime(2022, 2, 11))
+    spaces = get_availability(
+        data, args["start_date"], args["start_date"] + timedelta(days=1))
 
     generate(spaces)
 
 
 def get_login_details():
+    start_time = datetime.now().date()
+
     parser = argparse.ArgumentParser(description="Mark attendance for RHUL")
-    parser.add_argument(
-        "-u", "--username", help="Full username for RHUL", required=True
-    )
+
+    parser.add_argument("-u", "--username",
+                        help="Full username for RHUL", required=True)
+
     parser.add_argument("-p", "--password",
                         help="Password for RHUL", required=True)
+
+    parser.add_argument("-s", "--start-date",
+                        help="Date to start searching from", type=datetime.fromisoformat, default=start_time)
 
     return vars(parser.parse_args())
 
@@ -62,6 +68,7 @@ def login(browser, args):
 def get_room_ids(browser):
     token = ""
     room_list = []
+
     # Nav to "Book a Study room" page once loaded
     link = WebDriverWait(browser, MAX_WAIT).until(
         EC.presence_of_element_located((By.CLASS_NAME, "resourcesGrid-item-link")))
@@ -81,6 +88,7 @@ def get_room_ids(browser):
     room_data = soup.find(
         "ul", {"class": "ember-view resourcesList-items"}).find_all("li")
 
+    # Extract date from table
     for room in room_data:
         name = room.find("span", {"class": "resourcesList-item-name"}).text
         room_id = room.find(
@@ -113,7 +121,7 @@ def get_availability(data, start, end):
             headers=headers,
             params=params)
 
-        for space in free_space(res.json()):
+        for space in free_space(res.json(), start):
             free_spaces.append({
                 "room": room["name"],
                 "start": space["StartDateTime"],
