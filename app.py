@@ -121,7 +121,7 @@ def get_availability(data, start, end):
             headers=headers,
             params=params)
 
-        for space in free_space(res.json()):
+        for space in free_space(res.json(), start):
             free_spaces.append({
                 "room": room["name"],
                 "start": space["StartDateTime"],

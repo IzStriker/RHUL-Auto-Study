@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+from itertools import filterfalse
+from pytz import UTC
 import json
 
 MIN_TIME_GAP = timedelta(hours=1)
@@ -11,10 +13,12 @@ def main():
     print(free_space(data))
 
 
-def free_space(data):
+def free_space(data, startDate):
+    free_spaces = []
+    startDate = UTC.localize(startDate.replace(hour=0, minute=0, second=0))
+    print(startDate)
     day_start = datetime.fromisoformat(
         data[0]["StartDateTime"]).replace(hour=0, minute=0, second=0)
-    free_spaces = []
 
     for i in range(len(data)):
         start = datetime.fromisoformat(data[i]["StartDateTime"])
@@ -46,7 +50,11 @@ def free_space(data):
                     "StartDateTime": previous_end,
                     "EndDateTime": start
                 })
-    return free_spaces
+
+    # Remove entries for previous days.
+    # Caused by booking spanning multiple days where first day is before start day.
+    # This can lead to incorrect reporting about availability due to limited data.
+    return filterfalse(lambda x: x["StartDateTime"] <= startDate, free_spaces)
 
 
 if __name__ == "__main__":
