@@ -1,5 +1,4 @@
 from datetime import date, datetime, timedelta
-from itertools import filterfalse
 from pytz import UTC
 import json
 
@@ -60,10 +59,7 @@ def free_space(data, start_date: date):
             "EndDateTime": end_datetime.astimezone()
         })
 
-    # Remove entries for previous days.
-    # Caused by booking spanning multiple days where first day is before start day.
-    # This can lead to incorrect reporting about availability due to limited data.
-    return filterfalse(lambda x: x["StartDateTime"] < start_datetime, free_spaces)
+    return free_spaces
 
 
 if __name__ == "__main__":
