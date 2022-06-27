@@ -1,0 +1,6 @@
+pytz==2021.1
+chromedriver_autoinstaller==0.2.2
+gviz_api==1.10.0
+selenium==3.141.0
+requests==2.25.1
+beautifulsoup4==4.11.1
