@@ -7,12 +7,14 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from graph_viz import generate
+from pytz import timezone, utc
 import requests
 import argparse
 
 
 LOGIN_PAGE = "https://scientia-rb-rhul.azurewebsites.net/app/booking-types"
 MAX_WAIT = 15
+LOCAL_TIME_ZONE = "Europe/London"
 
 
 def main():
@@ -102,15 +104,21 @@ def get_room_ids(browser):
     return {"token": token, "room_list":  room_list}
 
 
-def get_availability(data, start, end):
+def get_availability(data, start_date, end_date):
+    # Set London to adjust for daylight saving timezone
+    start = timezone(LOCAL_TIME_ZONE).localize(
+        datetime.combine(start_date, datetime.min.time()))
+
+    end = timezone(LOCAL_TIME_ZONE).localize(
+        datetime.combine(end_date, datetime.min.time()))
 
     headers = {
         "Authorization": "Bearer " + data["token"],
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.81 Safari/537.36"
     }
     params = {
-        "StartDate": start.strftime('%Y-%m-%dT%H:%M:%SZ'),
-        "EndDate": end.strftime('%Y-%m-%dT%H:%M:%SZ'),
+        "StartDate": start.astimezone(utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+        "EndDate": end.astimezone(utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
         "CheckSplitPermissions": False
     }
 
