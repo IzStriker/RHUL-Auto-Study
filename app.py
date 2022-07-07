@@ -30,7 +30,7 @@ def main():
     spaces = get_availability(
         data, args["start_date"], args["start_date"] + timedelta(days=1))
 
-    generate(spaces)
+    generate(spaces, args["start_date"])
 
 
 def get_login_details():

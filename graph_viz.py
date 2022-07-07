@@ -1,42 +1,44 @@
 from datetime import datetime
 import gviz_api
+import os
 
-page_template = """
-<html>
-  <script src="https://www.gstatic.com/charts/loader.js"></script>
-  <script>
-    google.charts.load('current', {packages:['timeline']});
-
-    google.charts.setOnLoadCallback(drawTable);
-    function drawTable() {
-  
-      var json_table = new google.visualization.Timeline(document.getElementById('table_div_json'));
-      var json_data = new google.visualization.DataTable(%(json)s, 0.6);
-      json_table.draw(json_data, {height: 700});
-    }
-  </script>
-  <body>
-    <H1>Table created using ToJSon</H1>
-    <div id="table_div_json"></div>
-  </body>
-</html>
-"""
+TIMETABLE_TEMPLATE_PATH = "./templates/timetable.html"
+OUTPUT_DIRECTORY = "./output"
 
 
-def generate(data):
+def generate(data, date):
+    page_template = ""
+    params = {}
+    date_string = date.strftime("%d-%m-%y")
+
     # Creating the data
-    description = {"room": ("string", "Room Name"),
-                   "start": ("datetime", "Period Start"),
-                   "end": ("datetime", "Period End")}
+    description = {
+        "room": ("string", "Room Name"),
+        "start": ("datetime", "Period Start"),
+        "end": ("datetime", "Period End")
+    }
 
     # Loading it into gviz_api.DataTable
     data_table = gviz_api.DataTable(description)
     data_table.LoadData(data)
 
     # Create a JSON string.
-    json = data_table.ToJSon(columns_order=("room", "start", "end"),
-                             order_by="room")
+    params["json"] = data_table.ToJSon(
+        columns_order=("room", "start", "end"),
+        order_by="room"
+    )
+    params["generated-date"] = datetime.now()
+    params["for-date"] = date_string
+
+    # Load Template file
+    with open(TIMETABLE_TEMPLATE_PATH, 'r') as f:
+        page_template = f.read()
+
+    try:
+        os.mkdir(OUTPUT_DIRECTORY)
+    except OSError:
+        pass
 
     # Put JSON string into the template.
-    with open('index.html', 'w') as f:
-        f.write(page_template % vars())
+    with open(os.path.join(OUTPUT_DIRECTORY, f"{date_string}.html"), 'w') as f:
+        f.write(page_template % params)
