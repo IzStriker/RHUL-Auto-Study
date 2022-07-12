@@ -4,3 +4,5 @@ gviz_api==1.10.0
 selenium==3.141.0
 requests==2.25.1
 beautifulsoup4==4.11.1
+pyvirtualdisplay==3.0
+
