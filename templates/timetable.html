@@ -7,12 +7,12 @@
     function drawTable() {
       var json_table = new google.visualization.Timeline(document.getElementById('table_div_json'));
       var json_data = new google.visualization.DataTable(%(json)s, 0.6);
-      json_table.draw(json_data, {height: 700});
+      json_table.draw(json_data, {height: 600});
     }
   </script>
   <body>
     <h1 style="text-align: center">RHUL Study Room Availability</h1>
-    <div id="table_div_json"></div>
     <p>Generate at %(generated-date)s for %(for-date)s</p>
+    <div id="table_div_json"></div>
   </body>
 </html>
