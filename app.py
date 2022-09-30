@@ -10,6 +10,9 @@ from graph_viz import generate
 from pytz import timezone, utc
 import requests
 import argparse
+from pyvirtualdisplay import Display
+import logger
+import traceback
 
 
 LOGIN_PAGE = "https://scientia-rb-rhul.azurewebsites.net/app/booking-types"
@@ -18,6 +21,9 @@ LOCAL_TIME_ZONE = "Europe/London"
 
 
 def main():
+    display = Display(visible=0, size=(1080, 1920))
+    display.start()
+
     args = get_login_details()
 
     chromedriver_autoinstaller.install()
@@ -140,4 +146,8 @@ def get_availability(data, start_date, end_date):
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except:
+        err = traceback.format_exc()
+        logger.logError(err)
