@@ -56,7 +56,7 @@ def login(browser, args):
 
     # Wait for button to load
     button = WebDriverWait(browser, MAX_WAIT).until(
-        EC.presence_of_element_located((By.ID, "ember529")))
+        EC.presence_of_element_located((By.XPATH, "/html/body/div/div/div/div/div/div[2]/button")))
     button.click()
     # Login
     browser.find_element(By.ID, "userNameInput").send_keys(args["username"])
